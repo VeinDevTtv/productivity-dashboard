@@ -30,7 +30,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
     estimatedMinutes: undefined
   });
 
-  const [errors, setErrors] = useState<Partial<TaskFormData>>({});
+  const [errors, setErrors] = useState<Partial<Record<keyof TaskFormData, string>>>({});
 
   // Initialize form data when task changes
   useEffect(() => {
@@ -57,7 +57,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
   }, [task, isOpen]);
 
   const validateForm = (): boolean => {
-    const newErrors: Partial<TaskFormData> = {};
+    const newErrors: Partial<Record<keyof TaskFormData, string>> = {};
 
     if (!formData.title.trim()) {
       newErrors.title = 'Title is required';

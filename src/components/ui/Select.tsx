@@ -1,4 +1,4 @@
-import React, { SelectHTMLAttributes, forwardRef } from 'react';
+import { type SelectHTMLAttributes, forwardRef } from 'react';
 
 interface SelectOption {
   value: string;

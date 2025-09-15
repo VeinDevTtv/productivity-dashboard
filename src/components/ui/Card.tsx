@@ -5,13 +5,15 @@ interface CardProps {
   className?: string;
   padding?: 'sm' | 'md' | 'lg';
   hover?: boolean;
+  style?: React.CSSProperties;
 }
 
 const Card: React.FC<CardProps> = ({ 
   children, 
   className = '', 
   padding = 'md',
-  hover = false 
+  hover = false,
+  style
 }) => {
   const paddingClasses = {
     sm: 'p-4',
@@ -27,7 +29,7 @@ const Card: React.FC<CardProps> = ({
   ].filter(Boolean).join(' ');
 
   return (
-    <div className={classes}>
+    <div className={classes} style={style}>
       {children}
     </div>
   );

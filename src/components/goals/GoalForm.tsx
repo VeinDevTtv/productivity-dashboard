@@ -31,7 +31,7 @@ const GoalForm: React.FC<GoalFormProps> = ({
     deadline: ''
   });
 
-  const [errors, setErrors] = useState<Partial<GoalFormData>>({});
+  const [errors, setErrors] = useState<Partial<Record<keyof GoalFormData, string>>>({});
 
   // Initialize form data when goal changes
   useEffect(() => {
@@ -58,7 +58,7 @@ const GoalForm: React.FC<GoalFormProps> = ({
   }, [goal, isOpen]);
 
   const validateForm = (): boolean => {
-    const newErrors: Partial<GoalFormData> = {};
+    const newErrors: Partial<Record<keyof GoalFormData, string>> = {};
 
     if (!formData.title.trim()) {
       newErrors.title = 'Title is required';

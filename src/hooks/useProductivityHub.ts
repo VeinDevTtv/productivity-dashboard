@@ -353,7 +353,7 @@ export function useProductivityHub() {
     }).reverse();
 
     // Monthly analytics would be calculated similarly
-    const monthly = []; // Simplified for this implementation
+    const monthly: any[] = []; // Simplified for this implementation
 
     return { daily, weekly, monthly };
   }, [tasks, studySessions, goals]);

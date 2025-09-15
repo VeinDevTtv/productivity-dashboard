@@ -5,13 +5,15 @@ interface BadgeProps {
   variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'error';
   size?: 'sm' | 'md';
   className?: string;
+  style?: React.CSSProperties;
 }
 
 const Badge: React.FC<BadgeProps> = ({ 
   children, 
   variant = 'primary', 
   size = 'md',
-  className = '' 
+  className = '',
+  style
 }) => {
   const baseClasses = 'badge';
   
@@ -36,7 +38,7 @@ const Badge: React.FC<BadgeProps> = ({
   ].filter(Boolean).join(' ');
 
   return (
-    <span className={classes}>
+    <span className={classes} style={style}>
       {children}
     </span>
   );
