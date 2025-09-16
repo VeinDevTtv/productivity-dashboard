@@ -4,6 +4,7 @@ import { formatDate, getCategoryColor, getPriorityColor } from '../../utils/help
 import Card from '../ui/Card';
 import Badge from '../ui/Badge';
 import Button from '../ui/Button';
+import Icon from '../ui/Icon';
 
 interface TaskCardProps {
   task: Task;
@@ -31,18 +32,21 @@ const TaskCard: React.FC<TaskCardProps> = ({
   };
 
   const priorityIcons = {
-    [Priority.LOW]: '⬇️',
-    [Priority.MEDIUM]: '➡️',
-    [Priority.HIGH]: '⬆️',
-    [Priority.URGENT]: '🔥',
+    [Priority.LOW]: 'arrow-down' as const,
+    [Priority.MEDIUM]: 'arrow-right' as const,
+    [Priority.HIGH]: 'arrow-up' as const,
+    [Priority.URGENT]: 'fire' as const,
   };
 
   return (
     <Card 
-      className={`transition-all duration-200 hover:shadow-md ${
+      variant={isOverdue ? 'outlined' : 'default'}
+      className={`transition-all duration-300 ${
         isCompleted ? 'opacity-60' : ''
-      } ${isOverdue ? 'border-l-4 border-l-red-500' : ''}`}
+      } ${isOverdue ? 'border-l-4 border-l-red-500 animate-pulse' : ''}`}
       padding={compact ? 'sm' : 'md'}
+      hover
+      animate
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
@@ -75,29 +79,33 @@ const TaskCard: React.FC<TaskCardProps> = ({
             </Badge>
 
             {/* Priority */}
-            <Badge variant={priorityVariant[task.priority]} size="sm">
-              {priorityIcons[task.priority]} {task.priority}
+            <Badge variant={priorityVariant[task.priority]} size="sm" className="flex items-center gap-1">
+              <Icon name={priorityIcons[task.priority]} size={12} />
+              {task.priority}
             </Badge>
 
             {/* Deadline */}
             {task.deadline && (
-              <span className={`text-sm ${isOverdue ? 'text-red-600' : 'text-secondary'}`}>
-                📅 {formatDate(task.deadline)}
-              </span>
+              <div className={`flex items-center gap-1 text-sm ${isOverdue ? 'text-red-600' : 'text-secondary'}`}>
+                <Icon name="calendar" size={14} />
+                <span>{formatDate(task.deadline)}</span>
+              </div>
             )}
 
             {/* Estimated time */}
             {task.estimatedMinutes && (
-              <span className="text-sm text-secondary">
-                ⏱️ {task.estimatedMinutes}m
-              </span>
+              <div className="flex items-center gap-1 text-sm text-secondary">
+                <Icon name="clock" size={14} />
+                <span>{task.estimatedMinutes}m</span>
+              </div>
             )}
 
             {/* Completion time */}
             {isCompleted && task.completedAt && (
-              <span className="text-sm text-green-600">
-                ✅ {formatDate(task.completedAt)}
-              </span>
+              <div className="flex items-center gap-1 text-sm text-green-600">
+                <Icon name="check" size={14} />
+                <span>{formatDate(task.completedAt)}</span>
+              </div>
             )}
           </div>
         </div>
@@ -109,30 +117,29 @@ const TaskCard: React.FC<TaskCardProps> = ({
               <Button
                 variant="ghost"
                 size="sm"
+                icon="check"
                 onClick={() => onComplete(task.id)}
                 title="Mark as complete"
-              >
-                ✓
-              </Button>
+                className="text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20"
+              />
               <Button
                 variant="ghost"
                 size="sm"
+                icon="edit"
                 onClick={() => onEdit(task)}
                 title="Edit task"
-              >
-                ✏️
-              </Button>
+                className="text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+              />
             </>
           )}
           <Button
             variant="ghost"
             size="sm"
+            icon="trash"
             onClick={() => onDelete(task.id)}
             title="Delete task"
             className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-          >
-            🗑️
-          </Button>
+          />
         </div>
       </div>
 
@@ -142,13 +149,19 @@ const TaskCard: React.FC<TaskCardProps> = ({
           <div className="flex justify-between text-xs text-secondary">
             <span>Estimated: {task.estimatedMinutes}m</span>
             <span>Actual: {task.actualMinutes}m</span>
-            <span className={
+            <div className={`flex items-center gap-1 ${
               task.actualMinutes <= task.estimatedMinutes 
                 ? 'text-green-600' 
                 : 'text-orange-600'
-            }>
-              {task.actualMinutes <= task.estimatedMinutes ? '✓ On time' : '⚠️ Over estimate'}
-            </span>
+            }`}>
+              <Icon 
+                name={task.actualMinutes <= task.estimatedMinutes ? 'check' : 'clock'} 
+                size={12} 
+              />
+              <span>
+                {task.actualMinutes <= task.estimatedMinutes ? 'On time' : 'Over estimate'}
+              </span>
+            </div>
           </div>
         </div>
       )}

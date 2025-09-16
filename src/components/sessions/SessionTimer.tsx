@@ -6,6 +6,8 @@ import Card from '../ui/Card';
 import Button from '../ui/Button';
 import Select from '../ui/Select';
 import Input from '../ui/Input';
+import Icon from '../ui/Icon';
+import Modal from '../ui/Modal';
 
 interface SessionTimerProps {
   activeSession?: StudySession;
@@ -125,32 +127,53 @@ const SessionTimer: React.FC<SessionTimerProps> = ({
   return (
     <div className="w-full">
       {/* Timer Display */}
-      <Card className="text-center mb-6">
-        <div className="mb-4">
+      <Card variant="glass" className="text-center mb-6 relative overflow-hidden">
+        {/* Animated background */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-500 animate-float" />
+        </div>
+        
+        <div className="relative z-10 mb-6">
           <div 
-            className="text-6xl font-mono font-bold mb-2"
-            style={{ color: getTimerColor() }}
+            className="text-7xl md:text-8xl font-mono font-bold mb-4 animate-pulse"
+            style={{ 
+              color: getTimerColor(),
+              textShadow: activeSession && !activeSession.isPaused ? `0 0 30px ${getTimerColor()}40` : 'none'
+            }}
           >
             {timer.formattedTime}
           </div>
-          <div className="text-lg text-secondary">
-            {getStatusText()}
+          
+          <div className="flex items-center justify-center gap-2 text-lg text-secondary mb-2">
+            <Icon 
+              name={activeSession ? (activeSession.isPaused ? 'pause' : 'play') : 'timer'} 
+              size={20} 
+              color={getTimerColor()}
+            />
+            <span>{getStatusText()}</span>
           </div>
+          
           {activeSession && (
-            <div className="text-sm text-secondary mt-1">
-              {activeSession.title || `${activeSession.type} session`} • {activeSession.category}
+            <div className="text-sm text-secondary mt-2 flex items-center justify-center gap-2">
+              <Icon name="book" size={16} />
+              <span>{activeSession.title || `${activeSession.type} session`}</span>
+              <span>•</span>
+              <span>{activeSession.category}</span>
             </div>
           )}
         </div>
 
         {/* Timer Controls */}
-        <div className="flex justify-center gap-3">
+        <div className="flex justify-center gap-4 mb-6">
           {!activeSession ? (
             <Button 
               onClick={() => setIsStartModalOpen(true)}
               size="lg"
+              variant="gradient"
+              icon="play"
+              className="px-8 py-4 text-lg font-semibold animate-bounce"
             >
-              🎯 Start Session
+              Start Session
             </Button>
           ) : (
             <>
@@ -158,34 +181,49 @@ const SessionTimer: React.FC<SessionTimerProps> = ({
                 onClick={handlePauseResume}
                 variant="secondary"
                 size="lg"
+                icon={activeSession.isPaused ? 'play' : 'pause'}
+                className="hover:scale-105 transition-transform"
               >
-                {activeSession.isPaused ? '▶️ Resume' : '⏸️ Pause'}
+                {activeSession.isPaused ? 'Resume' : 'Pause'}
               </Button>
               <Button
                 onClick={() => setIsEndModalOpen(true)}
                 variant="danger"
                 size="lg"
+                icon="stop"
+                className="hover:scale-105 transition-transform"
               >
-                ⏹️ End Session
+                End Session
               </Button>
             </>
           )}
         </div>
 
-        {/* Progress Bar */}
+        {/* Enhanced Progress Bar */}
         {activeSession && (
           <div className="mt-6">
-            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+            <div className="relative w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
               <div 
-                className="h-2 rounded-full transition-all duration-1000"
+                className="h-full rounded-full transition-all duration-1000 relative overflow-hidden"
                 style={{
                   width: `${(timer.time / duration) * 100}%`,
-                  backgroundColor: getTimerColor()
+                  background: `linear-gradient(90deg, ${getTimerColor()}, ${getTimerColor()}dd)`
                 }}
+              >
+                {/* Animated shimmer effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" />
+              </div>
+              
+              {/* Progress indicator */}
+              <div 
+                className="absolute top-0 w-1 h-full bg-white rounded-full shadow-lg transition-all duration-1000"
+                style={{ left: `${(timer.time / duration) * 100}%` }}
               />
             </div>
-            <div className="flex justify-between text-xs text-secondary mt-1">
+            
+            <div className="flex justify-between text-xs text-secondary mt-2">
               <span>0:00</span>
+              <span className="font-medium">{Math.round(((duration - timer.time) / duration) * 100)}% remaining</span>
               <span>{Math.floor(duration / 60)}:00</span>
             </div>
           </div>
@@ -219,13 +257,15 @@ const SessionTimer: React.FC<SessionTimerProps> = ({
       )}
 
       {/* Start Session Modal */}
-      {isStartModalOpen && (
-        <div className="modal-overlay" onClick={() => setIsStartModalOpen(false)}>
-          <div className="modal-content max-w-md" onClick={e => e.stopPropagation()}>
-            <div className="p-6">
-              <h3 className="text-xl font-semibold mb-4">Start Study Session</h3>
-              
-              <div className="space-y-4">
+      <Modal 
+        isOpen={isStartModalOpen}
+        onClose={() => setIsStartModalOpen(false)}
+        title="Start Study Session"
+        variant="glass"
+        size="md"
+      >
+        <div className="space-y-6">
+          <div className="space-y-4">
                 <Input
                   label="Session Title (Optional)"
                   value={title}
@@ -258,37 +298,45 @@ const SessionTimer: React.FC<SessionTimerProps> = ({
                   onChange={(e) => setCategory(e.target.value as TaskCategory)}
                 />
 
-                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                  <p className="text-sm">
-                    <strong>Duration:</strong> {sessionType === SessionType.CUSTOM ? customDuration : SESSION_DURATIONS[sessionType]} minutes
-                  </p>
-                </div>
+            <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200/50 dark:border-blue-700/50">
+              <div className="flex items-center gap-2 mb-2">
+                <Icon name="clock" size={16} className="text-blue-600" />
+                <span className="font-medium text-blue-800 dark:text-blue-200">Session Duration</span>
               </div>
-
-              <div className="flex justify-end gap-3 mt-6">
-                <Button 
-                  variant="secondary" 
-                  onClick={() => setIsStartModalOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button onClick={handleStartSession}>
-                  Start Session
-                </Button>
-              </div>
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                {sessionType === SessionType.CUSTOM ? customDuration : SESSION_DURATIONS[sessionType]} minutes
+              </p>
             </div>
           </div>
+
+          <div className="flex justify-end gap-3">
+            <Button 
+              variant="secondary" 
+              onClick={() => setIsStartModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="gradient"
+              onClick={handleStartSession}
+              icon="play"
+            >
+              Start Session
+            </Button>
+          </div>
         </div>
-      )}
+      </Modal>
 
       {/* End Session Modal */}
-      {isEndModalOpen && (
-        <div className="modal-overlay" onClick={() => setIsEndModalOpen(false)}>
-          <div className="modal-content max-w-md" onClick={e => e.stopPropagation()}>
-            <div className="p-6">
-              <h3 className="text-xl font-semibold mb-4">End Study Session</h3>
-              
-              <div className="space-y-4">
+      <Modal
+        isOpen={isEndModalOpen}
+        onClose={() => setIsEndModalOpen(false)}
+        title="End Study Session"
+        variant="glass"
+        size="md"
+      >
+        <div className="space-y-6">
+          <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">
                     How was your focus? (1-10)
@@ -328,29 +376,34 @@ const SessionTimer: React.FC<SessionTimerProps> = ({
                   />
                 </div>
 
-                <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                  <p className="text-sm">
-                    Great work! You've completed your study session. 
-                    Your progress will be tracked and you'll earn XP for your effort.
-                  </p>
-                </div>
+            <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg border border-green-200/50 dark:border-green-700/50">
+              <div className="flex items-center gap-2 mb-2">
+                <Icon name="trophy" size={16} className="text-green-600" />
+                <span className="font-medium text-green-800 dark:text-green-200">Great Work!</span>
               </div>
-
-              <div className="flex justify-end gap-3 mt-6">
-                <Button 
-                  variant="secondary" 
-                  onClick={handleCancelSession}
-                >
-                  Skip Rating
-                </Button>
-                <Button onClick={handleEndSession}>
-                  Complete Session
-                </Button>
-              </div>
+              <p className="text-sm text-green-700 dark:text-green-300">
+                You've completed your study session. Your progress will be tracked and you'll earn XP for your effort.
+              </p>
             </div>
           </div>
+
+          <div className="flex justify-end gap-3">
+            <Button 
+              variant="secondary" 
+              onClick={handleCancelSession}
+            >
+              Skip Rating
+            </Button>
+            <Button 
+              variant="gradient"
+              onClick={handleEndSession}
+              icon="check"
+            >
+              Complete Session
+            </Button>
+          </div>
         </div>
-      )}
+      </Modal>
     </div>
   );
 };

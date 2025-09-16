@@ -2,6 +2,7 @@ import React from 'react';
 import { UserProgress } from '../../types';
 import LevelProgress from '../gamification/LevelProgress';
 import Button from '../ui/Button';
+import Icon from '../ui/Icon';
 
 interface SidebarProps {
   userProgress: UserProgress;
@@ -23,13 +24,13 @@ const Sidebar: React.FC<SidebarProps> = ({
   onToggleCollapse
 }) => {
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: '🏠' },
-    { id: 'tasks', label: 'Tasks', icon: '📋' },
-    { id: 'goals', label: 'Goals', icon: '🎯' },
-    { id: 'sessions', label: 'Study Timer', icon: '⏱️' },
-    { id: 'analytics', label: 'Analytics', icon: '📊' },
-    { id: 'insights', label: 'AI Insights', icon: '🤖' },
-    { id: 'achievements', label: 'Achievements', icon: '🏆' },
+    { id: 'dashboard', label: 'Dashboard', icon: 'home' as const },
+    { id: 'tasks', label: 'Tasks', icon: 'tasks' as const },
+    { id: 'goals', label: 'Goals', icon: 'target' as const },
+    { id: 'sessions', label: 'Study Timer', icon: 'timer' as const },
+    { id: 'analytics', label: 'Analytics', icon: 'chart' as const },
+    { id: 'insights', label: 'AI Insights', icon: 'brain' as const },
+    { id: 'achievements', label: 'Achievements', icon: 'trophy' as const },
   ];
 
   return (
@@ -46,22 +47,14 @@ const Sidebar: React.FC<SidebarProps> = ({
           )}
           <button
             onClick={onToggleCollapse}
-            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all duration-200 transform hover:scale-110"
             title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
-            <svg 
-              className={`w-5 h-5 transition-transform ${isCollapsed ? 'rotate-180' : ''}`} 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M11 19l-7-7 7-7m8 14l-7-7 7-7" 
-              />
-            </svg>
+            <Icon 
+              name={isCollapsed ? 'chevron-right' : 'chevron-left'} 
+              size={20}
+              className="transition-transform duration-200"
+            />
           </button>
         </div>
       </div>
@@ -80,14 +73,20 @@ const Sidebar: React.FC<SidebarProps> = ({
             <li key={item.id}>
               <button
                 onClick={() => onViewChange(item.id)}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left ${
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 text-left transform hover:scale-[1.02] ${
                   activeView === item.id
-                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
-                    : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+                    ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-600 dark:text-blue-400 shadow-sm border border-blue-200/50 dark:border-blue-700/50'
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-800 hover:shadow-sm'
                 }`}
                 title={isCollapsed ? item.label : undefined}
               >
-                <span className="text-lg">{item.icon}</span>
+                <Icon 
+                  name={item.icon} 
+                  size={isCollapsed ? 20 : 18}
+                  className={`flex-shrink-0 transition-colors duration-200 ${
+                    activeView === item.id ? 'text-blue-600 dark:text-blue-400' : ''
+                  }`}
+                />
                 {!isCollapsed && (
                   <span className="font-medium">{item.label}</span>
                 )}
@@ -103,18 +102,16 @@ const Sidebar: React.FC<SidebarProps> = ({
           <Button
             onClick={onThemeToggle}
             variant="ghost"
+            icon={theme === 'dark' ? 'sun' : 'moon'}
             className="w-full justify-start"
             title={isCollapsed ? (theme === 'dark' ? 'Light mode' : 'Dark mode') : undefined}
           >
-            <span className="text-lg">{theme === 'dark' ? '☀️' : '🌙'}</span>
-            {!isCollapsed && (
-              <span className="ml-2">{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
-            )}
+            {!isCollapsed && (theme === 'dark' ? 'Light Mode' : 'Dark Mode')}
           </Button>
           
           {!isCollapsed && (
-            <div className="text-xs text-secondary text-center">
-              Made with ❤️ for students
+            <div className="text-xs text-secondary text-center flex items-center justify-center gap-1">
+              Made with <Icon name="heart" size={12} className="text-red-500 animate-pulse" /> for students
             </div>
           )}
         </div>
